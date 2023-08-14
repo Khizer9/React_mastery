@@ -25,8 +25,10 @@ const App = () => {
 
   const [products, setProducts] = useState(gettingProductsFromLocalStorage);
   const [carts, setCarts] = useState([]);
+  const [confirm, setConfirm] = useState([]);
 
   const [showProducts, setShowProducts] = useState(true);
+  const [showCarts, setShowCarts] = useState(true);
 
   // done
   const inputHandlers = (e) => {
@@ -73,6 +75,7 @@ const App = () => {
   const addToCart = (x) => {
     removeProduct(x.id);
     setCarts([...carts, x]);
+    console.log(carts, "carts")
   };
 
   // ShowProduct -> true ---- Products
@@ -89,7 +92,18 @@ const App = () => {
   //   return amount;
   // };
 
-  const totalAmount = carts.reduce((x, y) => x + y.price, 0);
+  let confirmHandler = () => {
+    setConfirm(carts)
+    setCarts([])
+  }
+
+  const confirmOrder = () => {
+    setShowCarts(!showCarts)
+    console.log(confirm, "ello")
+  }
+
+  const totalAmount = carts.reduce((x, y) => x + parseFloat(y.price), 0) ;
+
 
   return (
     <div className="container">
@@ -99,31 +113,68 @@ const App = () => {
         inputHandlers={inputHandlers}
         addProduct={addProduct}
       />
-      <Btns switchToCart={switchToCart} cartsCount={carts.length} />
+      <Btns switchToCart={switchToCart} cartsCount={carts.length} confirmCount={confirm.length} confirmOrder={confirmOrder}/>
       {showProducts === true ? (
-        <ProductList products={products} addToCart={addToCart} />
-      ) : (
-        <>
-          <ul>
-            <h5> Total Amount : {totalAmount} </h5>
-            {carts.map((x) => (
-              <>
-                <li
-                  style={{
-                    backgroundColor: "white",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    marginBottom: "5px",
-                  }}
-                >
-                  {x.name} - {x.price} PKR
-                </li>
-              </>
-            ))}
-          </ul>
-        </>
-      )}
+  <ProductList products={products} addToCart={addToCart} />
+) : (
+  <>
+    <ul>
+      <h5> Total Amount : {totalAmount} </h5>
+      {showCarts === true ? (<button onClick={confirmHandler}> Confirm Order </button>) : ""}
+      
+      {/* {carts.map((x) => (
+        <li
+          key={x.id} 
+          style={{
+            backgroundColor: "white",
+            padding: "10px",
+            borderRadius: "5px",
+            marginBottom: "5px",
+          }}
+        >
+          {x.name} - {x.price} PKR
+        </li>
+      ))} */}
+    </ul>
+    {showCarts === true ? (
+      <ul>
+        {carts.map((x) => (
+          <li
+            key={x.id} 
+            style={{
+              backgroundColor: "white",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "5px",
+            }}
+          >
+            {x.name} - {x.price} PKR
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <ul>
+        {confirm.map((x) => (
+          <li
+            key={x.id} 
+            style={{
+              backgroundColor: "white",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "5px",
+            }}
+          >
+            {x.name} - {x.price} PKR
+          </li>
+        ))}
+      </ul>
+    )}
+  </>
+)}
+
+      
     </div>
+    
   );
 };
 
