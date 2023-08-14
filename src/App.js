@@ -3,7 +3,8 @@ import Header from "./components/header";
 import InputForms from "./components/inputForms";
 import ProductList from "./components/ProductList";
 import Btns from "./components/Btns";
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faXmark } from '@fortawesome/free-solid-svg-icons'
 const defaultValues = {
   name: "",
   price: 0,
@@ -23,8 +24,17 @@ const App = () => {
     }
   };
 
+  const gettingCartProductFromLS =() => {
+    let data = localStorage.getItem("carts")
+    if(data) {
+      return JSON.parse(data);
+    }else {
+      return []
+    }
+  }
+
   const [products, setProducts] = useState(gettingProductsFromLocalStorage);
-  const [carts, setCarts] = useState([]);
+  const [carts, setCarts] = useState(gettingCartProductFromLS);
   const [confirm, setConfirm] = useState([]);
 
   const [showProducts, setShowProducts] = useState(true);
@@ -67,9 +77,16 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
+  useEffect(() => {
+    localStorage.setItem("carts", JSON.stringify(carts));
+  }, [carts]);
   // done
   const removeProduct = (id) => {
     setProducts(products.filter((x) => x.id !== id));
+  };
+  const removeCart = (id) => {
+    let reCart = (carts.filter((x) => x.id !== id));
+    console.log(reCart, "remove cart")
   };
   // done
   const addToCart = (x) => {
@@ -102,7 +119,8 @@ const App = () => {
     console.log(confirm, "ello")
   }
 
-  const totalAmount = carts.reduce((x, y) => x + parseFloat(y.price), 0) ;
+  const totalAmountFromCarts = carts.reduce((x, y) => x + parseFloat(y.price), 0) ;
+  const totalAmountFromConfirm = confirm.reduce((x, y) => x + parseFloat(y.price), 0) ;
 
 
   return (
@@ -119,7 +137,7 @@ const App = () => {
 ) : (
   <>
     <ul>
-      <h5> Total Amount : {totalAmount} </h5>
+      <h5> Total Amount : {totalAmountFromCarts !== 0 ? totalAmountFromCarts : totalAmountFromConfirm} </h5>
       {showCarts === true ? (<button onClick={confirmHandler}> Confirm Order </button>) : ""}
       
       {/* {carts.map((x) => (
@@ -146,26 +164,34 @@ const App = () => {
               padding: "10px",
               borderRadius: "5px",
               marginBottom: "5px",
+              display: "flex",
+              justifyContent: "space-between"
             }}
           >
             {x.name} - {x.price} PKR
+            <FontAwesomeIcon onClick={removeCart(x.id)} icon={faXmark} />
           </li>
         ))}
       </ul>
     ) : (
       <ul>
         {confirm.map((x) => (
-          <li
+          <>  
+          <li          
             key={x.id} 
             style={{
               backgroundColor: "white",
               padding: "10px",
               borderRadius: "5px",
               marginBottom: "5px",
+              display: "flex",
+              justifyContent: "space-between"
             }}
           >
             {x.name} - {x.price} PKR
+            <FontAwesomeIcon onClick={removeCart(x.id)} icon={faXmark} />
           </li>
+          </>
         ))}
       </ul>
     )}
