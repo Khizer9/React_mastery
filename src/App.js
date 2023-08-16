@@ -33,9 +33,18 @@ const App = () => {
     }
   }
 
+  const confirmOrderFromLC = () => {
+    const data = localStorage.getItem("confirmOrder")
+    if(data){
+      return JSON.parse(data);
+    }else {
+      return [];
+    }
+  }
+
   const [products, setProducts] = useState(gettingProductsFromLocalStorage);
   const [carts, setCarts] = useState(gettingCartProductFromLS);
-  const [confirm, setConfirm] = useState([]);
+  const [confirm, setConfirm] = useState(confirmOrderFromLC);
 
   const [showProducts, setShowProducts] = useState(true);
   const [showCarts, setShowCarts] = useState(true);
@@ -50,8 +59,6 @@ const App = () => {
 
   // running
   const addProduct = () => {
-    // check input empty
-    // else -> [...products, {newName, newPRice, newDesc} ]
 
     if (
       productValues.name === "" ||
@@ -77,17 +84,30 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("products", JSON.stringify(products));
   }, [products]);
+
   useEffect(() => {
     localStorage.setItem("carts", JSON.stringify(carts));
   }, [carts]);
+
+  useEffect(() => {
+    localStorage.setItem("confirmOrder", JSON.stringify(confirm));
+  }, [confirm]);
+
   // done
   const removeProduct = (id) => {
     setProducts(products.filter((x) => x.id !== id));
   };
+
   const removeCart = (id) => {
     let reCart = (carts.filter((x) => x.id !== id));
-    console.log(reCart, "remove cart")
+    setCarts(reCart);
   };
+
+  const removeConfirm = (id) => {
+    let reCart = (confirm.filter((x) => x.id !== id));
+    setConfirm(reCart)
+  };
+
   // done
   const addToCart = (x) => {
     removeProduct(x.id);
@@ -95,28 +115,20 @@ const App = () => {
     console.log(carts, "carts")
   };
 
-  // ShowProduct -> true ---- Products
-  // ShowProduct -> false ----- carts
+
   const switchToCart = () => {
     setShowProducts(!showProducts);
   };
 
-  // let amount = 0;
-  // const totalAmount = () => {
-  //   for (let i = 0; i < carts.length; i++) {
-  //     amount = amount + parseInt(carts[i].price);
-  //   }
-  //   return amount;
-  // };
 
   let confirmHandler = () => {
     setConfirm(carts)
     setCarts([])
+    
   }
 
   const confirmOrder = () => {
     setShowCarts(!showCarts)
-    console.log(confirm, "ello")
   }
 
   const totalAmountFromCarts = carts.reduce((x, y) => x + parseFloat(y.price), 0) ;
@@ -140,19 +152,6 @@ const App = () => {
       <h5> Total Amount : {totalAmountFromCarts !== 0 ? totalAmountFromCarts : totalAmountFromConfirm} </h5>
       {showCarts === true ? (<button onClick={confirmHandler}> Confirm Order </button>) : ""}
       
-      {/* {carts.map((x) => (
-        <li
-          key={x.id} 
-          style={{
-            backgroundColor: "white",
-            padding: "10px",
-            borderRadius: "5px",
-            marginBottom: "5px",
-          }}
-        >
-          {x.name} - {x.price} PKR
-        </li>
-      ))} */}
     </ul>
     {showCarts === true ? (
       <ul>
@@ -169,7 +168,7 @@ const App = () => {
             }}
           >
             {x.name} - {x.price} PKR
-            <FontAwesomeIcon onClick={removeCart(x.id)} icon={faXmark} />
+            <FontAwesomeIcon onClick={() => removeCart(x.id)} icon={faXmark} />
           </li>
         ))}
       </ul>
@@ -189,7 +188,7 @@ const App = () => {
             }}
           >
             {x.name} - {x.price} PKR
-            <FontAwesomeIcon onClick={removeCart(x.id)} icon={faXmark} />
+            <FontAwesomeIcon onClick={() => removeConfirm(x.id)} icon={faXmark} />
           </li>
           </>
         ))}
